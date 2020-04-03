@@ -1,7 +1,7 @@
 /*
  * Created by Andrii Kovalchuk
  * Copyright (c) 2020. All rights reserved.
- * Last modified 02.04.20 17:25
+ * Last modified 03.04.20 19:16
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -18,7 +18,6 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DefaultItemAnimator
 import com.mmdev.business.core.UserItem
-import com.mmdev.roove.R
 import com.mmdev.roove.databinding.FragmentCardsBinding
 import com.mmdev.roove.ui.common.base.BaseFragment
 import com.mmdev.roove.ui.dating.cards.CardsViewModel
@@ -106,21 +105,13 @@ class CardsFragment: BaseFragment<CardsViewModel>() {
 
 		cardStackView.apply {
 			adapter = mCardsStackAdapter
-			layoutManager = cardStackLayoutManager
+			layoutManager = cardStackLayoutManager.apply { setCanScrollVertical(false) }
 			itemAnimator.apply {
 				if (this is DefaultItemAnimator) {
 					supportsChangeAnimations = false
 				}
 			}
 		}
-
-		mCardsStackAdapter.setOnItemClickListener(object: CardsStackAdapter.OnItemClickListener {
-			override fun onItemClick(item: UserItem, position: Int) {
-
-				sharedViewModel.userSelected.value = item
-				navController.navigate(R.id.action_cards_to_profileFragment)
-			}
-		})
 
 	}
 
