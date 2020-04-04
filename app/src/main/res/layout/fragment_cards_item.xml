@@ -2,7 +2,7 @@
 <!--
   ~ Created by Andrii Kovalchuk
   ~ Copyright (c) 2020. All rights reserved.
-  ~ Last modified 03.04.20 19:15
+  ~ Last modified 04.04.20 17:41
   ~
   ~ This Source Code Form is subject to the terms of the Mozilla Public
   ~ License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -22,173 +22,177 @@
 
 	</data>
 
-	<androidx.constraintlayout.motion.widget.MotionLayout
-		android:id="@+id/cardContainer"
+	<com.google.android.material.card.MaterialCardView
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:background="@color/colorPrimaryDark"
-		app:layoutDescription="@xml/card_detail_scene"
+		app:cardCornerRadius="@dimen/general_size_16dp"
 		>
 
-		<androidx.viewpager2.widget.ViewPager2
-			android:id="@+id/viewPagerCardPhotoList"
-			android:layout_width="0dp"
-			android:layout_height="0dp"
-			app:bindPhotos="@{bindItem.photoURLs}"
-
-			app:layout_constraintTop_toTopOf="parent"
-			app:layout_constraintBottom_toBottomOf="parent"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintStart_toStartOf="parent"
-			/>
-
-		<View
-			android:id="@+id/viewPagerClickableDispatcher"
-			android:layout_width="0dp"
-			android:layout_height="0dp"
-			android:background="@null"
-
-			app:layout_constraintTop_toTopOf="parent"
-			app:layout_constraintBottom_toBottomOf="@id/viewPagerCardPhotoList"
-			app:layout_constraintEnd_toStartOf="@id/nextImage"
-			app:layout_constraintStart_toEndOf="@id/previousImage"
-			/>
-
-		<com.google.android.material.tabs.TabLayout
-			android:id="@+id/tlCardPhotosIndicator"
-			android:layout_width="0dp"
-			android:layout_height="@dimen/general_size_2dp"
-			android:layout_marginStart="@dimen/general_size_2dp"
-			android:layout_marginEnd="@dimen/general_size_2dp"
-			android:layout_gravity="bottom"
-			android:background="@null"
-
-			app:tabBackground="@drawable/tab_line_unselected_state"
-			app:tabIndicatorColor="@color/white"
-			app:tabIndicatorGravity="center"
-			app:tabIndicatorFullWidth="true"
-			app:tabGravity="fill"
-
-			app:tabMaxWidth="500dp"
-
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintTop_toTopOf="parent"
-			app:layout_constraintBottom_toTopOf="@id/viewPagerCardPhotoList"
-			/>
-
-		<!-- "toolbar" background -->
-		<View
-			android:id="@+id/toolbarBackground"
-			android:layout_width="0dp"
-			android:layout_height="?actionBarSize"
-			android:alpha="0"
-			android:background="@color/colorPrimary"
-
-			app:layout_constraintStart_toStartOf="@id/viewPagerCardPhotoList"
-			app:layout_constraintEnd_toEndOf="@id/viewPagerCardPhotoList"
-			app:layout_constraintBottom_toBottomOf="@id/viewPagerCardPhotoList"
-			/>
-
-		<TextView
-			android:id="@+id/tvCardUserName"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginStart="@dimen/general_size_16dp"
-
-			android:text="@{bindItem.baseUserInfo.name, default = @string/default_name}"
-			android:textSize="30sp"
-			style="@style/regular_text"
-
-			app:layout_constraintTop_toTopOf="@id/toolbarBackground"
-			app:layout_constraintStart_toStartOf="@id/toolbarBackground"
-			app:layout_constraintBottom_toBottomOf="@id/toolbarBackground"
-			/>
-
-		<!-- click previous -->
-		<View
-			android:id="@+id/previousImage"
-			android:layout_width="100dp"
-			android:layout_height="0dp"
-			android:background="@null"
-			android:layout_marginTop="?actionBarSize"
-
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintTop_toTopOf="parent"
-			app:layout_constraintBottom_toTopOf="@id/tvCardUserName"
-			/>
-
-		<!-- click next -->
-		<View
-			android:id="@+id/nextImage"
-			android:layout_width="100dp"
-			android:layout_height="0dp"
-			android:background="@null"
-			android:layout_marginTop="?actionBarSize"
-
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintTop_toTopOf="parent"
-			app:layout_constraintBottom_toBottomOf="parent"
-			/>
-
-		<FrameLayout
-			android:id="@+id/left_overlay"
-			android:layout_width="0dp"
-			android:layout_height="0dp"
-			android:background="@drawable/fragment_card_item_skip_overlay"
-
-			app:layout_constraintBottom_toBottomOf="parent"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintTop_toTopOf="parent">
-
-			<ImageView
-				android:id="@+id/ivCardSkipIndicator"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:contentDescription="@string/fragment_card_skip_img_description"
-				android:src="@drawable/ic_card_skip_120dp" />
-
-		</FrameLayout>
-
-		<FrameLayout
-			android:id="@+id/right_overlay"
-			android:layout_width="0dp"
-			android:layout_height="0dp"
-			android:background="@drawable/fragment_card_item_like_overlay"
-
-			app:layout_constraintBottom_toBottomOf="parent"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintTop_toTopOf="parent">
-
-			<ImageView
-				android:id="@+id/ivCardLikeIndicator"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:contentDescription="@string/fragment_card_like_img_description"
-				android:src="@drawable/ic_card_like_120dp" />
-
-		</FrameLayout>
-
-
-		<androidx.core.widget.NestedScrollView
-			android:id="@+id/nestedScroll"
-			android:layout_width="0dp"
-			android:layout_height="wrap_content"
-			android:overScrollMode="never"
-
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintTop_toBottomOf="@id/viewPagerCardPhotoList"
+		<androidx.constraintlayout.motion.widget.MotionLayout
+			android:id="@+id/cardContainer"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			app:layoutDescription="@xml/card_detail_scene"
 			>
+
+			<androidx.viewpager2.widget.ViewPager2
+				android:id="@+id/viewPagerCardPhotoList"
+				android:layout_width="0dp"
+				android:layout_height="0dp"
+
+				app:bindPhotos="@{bindItem.photoURLs}"
+
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toBottomOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintStart_toStartOf="parent"
+				/>
+
+			<!-- click dispatcher for viewpager2 -->
+			<View
+				android:id="@+id/viewPagerClickableDispatcher"
+				android:layout_width="0dp"
+				android:layout_height="0dp"
+				android:background="@null"
+
+				app:layout_constraintTop_toTopOf="@id/viewPagerCardPhotoList"
+				app:layout_constraintBottom_toBottomOf="@id/viewPagerCardPhotoList"
+				app:layout_constraintEnd_toEndOf="@id/viewPagerCardPhotoList"
+				app:layout_constraintStart_toStartOf="@id/viewPagerCardPhotoList"
+				/>
+
+			<com.google.android.material.tabs.TabLayout
+				android:id="@+id/tlCardPhotosIndicator"
+				android:layout_width="0dp"
+				android:layout_height="@dimen/general_size_2dp"
+				android:layout_marginStart="@dimen/general_size_2dp"
+				android:layout_marginEnd="@dimen/general_size_2dp"
+				android:layout_gravity="bottom"
+				android:background="@null"
+
+				app:tabBackground="@drawable/tab_line_unselected_state"
+				app:tabIndicatorColor="@color/white"
+				app:tabIndicatorGravity="center"
+				app:tabIndicatorFullWidth="true"
+				app:tabGravity="fill"
+
+				app:tabMaxWidth="500dp"
+
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toTopOf="@id/viewPagerCardPhotoList"
+				/>
+
+			<!-- "toolbar" background -->
+			<View
+				android:id="@+id/toolbarBackground"
+				android:layout_width="0dp"
+				android:layout_height="?actionBarSize"
+				android:alpha="0"
+				android:background="@color/colorPrimary"
+
+				app:layout_constraintStart_toStartOf="@id/viewPagerCardPhotoList"
+				app:layout_constraintEnd_toEndOf="@id/viewPagerCardPhotoList"
+				app:layout_constraintBottom_toBottomOf="@id/viewPagerCardPhotoList"
+				/>
+
+			<TextView
+				android:id="@+id/tvCardUserName"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="@dimen/general_size_16dp"
+
+				android:text="@{bindItem.baseUserInfo.name, default = @string/default_name}"
+				android:textSize="30sp"
+				style="@style/regular_text"
+
+				app:layout_constraintTop_toTopOf="@id/toolbarBackground"
+				app:layout_constraintStart_toStartOf="@id/toolbarBackground"
+				app:layout_constraintBottom_toBottomOf="@id/toolbarBackground"
+				/>
+
+			<!-- click previous -->
+			<View
+				android:id="@+id/previousImage"
+				android:layout_width="100dp"
+				android:layout_height="0dp"
+				android:background="@null"
+				android:layout_marginTop="?actionBarSize"
+
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toTopOf="@id/tvCardUserName"
+				/>
+
+			<!-- click next -->
+			<View
+				android:id="@+id/nextImage"
+				android:layout_width="100dp"
+				android:layout_height="0dp"
+				android:background="@null"
+				android:layout_marginTop="?actionBarSize"
+
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toBottomOf="parent"
+				/>
+
+			<FrameLayout
+				android:id="@+id/left_overlay"
+				android:layout_width="0dp"
+				android:layout_height="0dp"
+				android:layout_margin="@dimen/general_size_2dp"
+				android:background="@drawable/fragment_card_item_skip_overlay"
+
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toBottomOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintStart_toStartOf="parent"
+				>
+
+				<ImageView
+					android:id="@+id/ivCardSkipIndicator"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:contentDescription="@string/fragment_card_skip_img_description"
+					android:src="@drawable/ic_card_skip_120dp" />
+
+			</FrameLayout>
+
+			<FrameLayout
+				android:id="@+id/right_overlay"
+				android:layout_width="0dp"
+				android:layout_height="0dp"
+				android:layout_margin="@dimen/general_size_2dp"
+				android:background="@drawable/fragment_card_item_like_overlay"
+
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toBottomOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintStart_toStartOf="parent"
+				>
+
+				<ImageView
+					android:id="@+id/ivCardLikeIndicator"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:contentDescription="@string/fragment_card_like_img_description"
+					android:src="@drawable/ic_card_like_120dp" />
+
+			</FrameLayout>
+
 
 			<androidx.constraintlayout.widget.ConstraintLayout
 				android:id="@+id/containerNestedScroll"
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintTop_toBottomOf="@id/viewPagerCardPhotoList"
 				>
 
 				<com.google.android.material.textview.MaterialTextView
@@ -278,34 +282,19 @@
 
 			</androidx.constraintlayout.widget.ConstraintLayout>
 
-		</androidx.core.widget.NestedScrollView>
+			<!-- catch swipe dispatcher from touch event -->
+			<com.mmdev.roove.ui.common.custom.components.TouchLayout
+				android:id="@+id/nestedScrollTouchDispatcher"
+				android:layout_width="0dp"
+				android:layout_height="0dp"
 
-		<com.google.android.material.floatingactionbutton.FloatingActionButton
-			android:id="@+id/fabProfileSendMessage"
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:layout_margin="@dimen/general_size_16dp"
-			android:src="@drawable/ic_profile_send_message_24dp"
+				app:layout_constraintBottom_toBottomOf="@id/containerNestedScroll"
+				app:layout_constraintEnd_toEndOf="@id/containerNestedScroll"
+				app:layout_constraintStart_toStartOf="@id/containerNestedScroll"
+				app:layout_constraintTop_toTopOf="@id/containerNestedScroll" />
 
-			app:elevation="0dp"
-			app:backgroundTint="@color/amethyst"
+		</androidx.constraintlayout.motion.widget.MotionLayout>
 
-			app:layout_constraintTop_toTopOf="@id/nestedScroll"
-			app:layout_constraintBottom_toTopOf="@id/nestedScroll"
-			app:layout_constraintEnd_toEndOf="@id/nestedScroll"
-			/>
-
-		<!-- catch swipe dispatcher from scroll view -->
-		<com.mmdev.roove.ui.common.custom.components.TouchLayout
-			android:id="@+id/nestedScrollTouchDispatcher"
-			android:layout_width="0dp"
-			android:layout_height="0dp"
-
-			app:layout_constraintBottom_toBottomOf="@id/nestedScroll"
-			app:layout_constraintEnd_toEndOf="@id/nestedScroll"
-			app:layout_constraintStart_toStartOf="@id/nestedScroll"
-			app:layout_constraintTop_toTopOf="@id/nestedScroll" />
-
-	</androidx.constraintlayout.motion.widget.MotionLayout>
+	</com.google.android.material.card.MaterialCardView>
 
 </layout>
