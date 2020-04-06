@@ -2,17 +2,15 @@
 <!--
   ~ Created by Andrii Kovalchuk
   ~ Copyright (c) 2020. All rights reserved.
-  ~ Last modified 30.03.20 17:59
+  ~ Last modified 06.04.20 15:01
   ~
   ~ This Source Code Form is subject to the terms of the Mozilla Public
   ~ License, v. 2.0. If a copy of the MPL was not distributed with this
   ~ file, You can obtain one at https://mozilla.org/MPL/2.0/.
   -->
 
-<layout
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools">
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:android="http://schemas.android.com/apk/res/android">
 
 	<data>
 
@@ -22,65 +20,235 @@
 
 	</data>
 
-	<androidx.constraintlayout.widget.ConstraintLayout
-		android:id="@+id/containerCards"
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent"
+	<androidx.constraintlayout.motion.widget.MotionLayout
+
+		android:id="@+id/coreMotionLayout"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
 		android:background="@color/colorPrimaryDark"
+		android:clipChildren="false"
+		app:layoutDescription="@xml/cards_scene"
+
+		app:paddingTopSystemWindowInsets="@{true}"
 		>
 
-		<com.yuyakaido.android.cardstackview.CardStackView
-			android:id="@+id/cardStackView"
-			android:layout_width="0dp"
+		<androidx.constraintlayout.widget.ConstraintLayout
+			android:id="@+id/bottomCard"
 			android:layout_height="0dp"
-			android:clipToPadding="false"
-			android:paddingStart="@dimen/general_size_16dp"
-			android:paddingEnd="@dimen/general_size_16dp"
-			android:paddingBottom="@dimen/general_size_8dp"
+			android:layout_width="0dp"
+			android:background="@color/colorPrimary"
 
-			app:visibilityInvisible="@{!viewModel.showLoading}"
-
-			app:paddingTopSystemWindowInsets="@{true}"
-
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintTop_toTopOf="parent"
 			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			>
 
-			tools:listitem="@layout/fragment_cards_item"
+			<androidx.viewpager2.widget.ViewPager2
+				android:id="@+id/viewPagerBottomCardPhotoList"
+				android:layout_width="0dp"
+				android:layout_height="0dp"
+
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toBottomOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintStart_toStartOf="parent"
+				/>
+
+			<com.google.android.material.tabs.TabLayout
+				android:id="@+id/tlBottomCardPhotosIndicator"
+				android:layout_width="0dp"
+				android:layout_height="@dimen/general_size_2dp"
+				android:layout_marginStart="@dimen/general_size_2dp"
+				android:layout_marginEnd="@dimen/general_size_2dp"
+				android:layout_gravity="bottom"
+				android:background="@null"
+
+				app:tabBackground="@drawable/tab_line_unselected_state"
+				app:tabIndicatorColor="@color/white"
+				app:tabIndicatorGravity="center"
+				app:tabIndicatorFullWidth="true"
+				app:tabGravity="fill"
+
+				app:tabMaxWidth="500dp"
+
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toTopOf="@id/viewPagerCardPhotoList"
+				/>
+
+			<!-- click previous -->
+			<View
+				android:id="@+id/bottomCardPreviousImage"
+				android:layout_width="50dp"
+				android:layout_height="0dp"
+				android:background="@null"
+				android:layout_marginTop="?actionBarSize"
+
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toTopOf="@id/tvBottomCardUserName"
+				/>
+
+			<!-- click next -->
+			<View
+				android:id="@+id/bottomCardNextImage"
+				android:layout_width="50dp"
+				android:layout_height="0dp"
+				android:background="@null"
+				android:layout_marginTop="?actionBarSize"
+
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toBottomOf="parent"
+				/>
+
+			<TextView
+				android:id="@+id/tvBottomCardUserName"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="@dimen/general_size_16dp"
+
+				android:text="@string/default_name"
+				android:textSize="30sp"
+				style="@style/regular_text"
+
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintBottom_toBottomOf="parent"
+				/>
+
+		</androidx.constraintlayout.widget.ConstraintLayout>
+
+		<androidx.constraintlayout.widget.ConstraintLayout
+			android:id="@+id/topCard"
+			android:layout_height="0dp"
+			android:layout_width="0dp"
+			android:background="@color/colorPrimary"
+
+			app:layout_constraintTop_toTopOf="parent"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			>
+
+
+			<androidx.viewpager2.widget.ViewPager2
+				android:id="@+id/viewPagerTopCardPhotoList"
+				android:layout_width="0dp"
+				android:layout_height="0dp"
+
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toBottomOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintStart_toStartOf="parent"
+				/>
+
+			<com.google.android.material.tabs.TabLayout
+				android:id="@+id/tlTopCardPhotosIndicator"
+				android:layout_width="0dp"
+				android:layout_height="@dimen/general_size_2dp"
+				android:layout_marginStart="@dimen/general_size_2dp"
+				android:layout_marginEnd="@dimen/general_size_2dp"
+				android:layout_gravity="bottom"
+				android:background="@null"
+
+				app:tabBackground="@drawable/tab_line_unselected_state"
+				app:tabIndicatorColor="@color/white"
+				app:tabIndicatorGravity="center"
+				app:tabIndicatorFullWidth="true"
+				app:tabGravity="fill"
+
+				app:tabMaxWidth="500dp"
+
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toTopOf="@id/viewPagerCardPhotoList"
+				/>
+
+			<!-- click previous -->
+			<View
+				android:id="@+id/topCardPreviousImage"
+				android:layout_width="50dp"
+				android:layout_height="0dp"
+				android:background="@null"
+				android:layout_marginTop="?actionBarSize"
+
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toTopOf="@id/tvTopCardUserName"
+				/>
+
+			<!-- click next -->
+			<View
+				android:id="@+id/topCardNextImage"
+				android:layout_width="50dp"
+				android:layout_height="0dp"
+				android:background="@null"
+				android:layout_marginTop="?actionBarSize"
+
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toBottomOf="parent"
+				/>
+
+			<TextView
+				android:id="@+id/tvTopCardUserName"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="@dimen/general_size_16dp"
+
+				android:text="@string/default_name"
+				android:textSize="30sp"
+				style="@style/regular_text"
+
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintBottom_toBottomOf="parent"
+				/>
+
+		</androidx.constraintlayout.widget.ConstraintLayout>
+
+		<!-- skip overlay -->
+		<ImageView
+			android:id="@+id/left_overlay"
+			android:layout_width="0dp"
+			android:layout_height="0dp"
+			android:background="@drawable/fragment_card_item_skip_overlay"
+			android:layout_gravity="center"
+			android:contentDescription="@string/fragment_card_skip_img_description"
+
+			android:scaleType="centerInside"
+			android:src="@drawable/ic_card_skip_120dp"
+
+			android:alpha="0"
+
+			app:layout_constraintTop_toTopOf="@id/topCard"
+			app:layout_constraintBottom_toBottomOf="@id/topCard"
+			app:layout_constraintEnd_toEndOf="@id/topCard"
+			app:layout_constraintStart_toStartOf="@id/topCard"
 			/>
 
-	    <com.mmdev.roove.ui.common.custom.components.LoadingView
-	        android:id="@+id/loadingViewCards"
-	        android:layout_width="120dp"
-	        android:layout_height="120dp"
+		<!-- like overlay -->
+		<ImageView
+			android:id="@+id/right_overlay"
+			android:layout_width="0dp"
+			android:layout_height="0dp"
+			android:background="@drawable/fragment_card_item_like_overlay"
+			android:layout_gravity="center"
+			android:contentDescription="@string/fragment_card_like_img_description"
 
-			app:visibilityInvisible="@{viewModel.showLoading}"
+			android:scaleType="centerInside"
+			android:src="@drawable/ic_card_like_120dp"
 
-			app:layout_constraintBottom_toBottomOf="parent"
-	        app:layout_constraintEnd_toEndOf="parent"
-	        app:layout_constraintStart_toStartOf="parent"
-	        app:layout_constraintTop_toTopOf="parent"
-	        tools:ignore="ContentDescription" />
+			android:alpha="0"
 
-	    <TextView
-		    android:id="@+id/tvCardHelperText"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-		    android:gravity="center"
+			app:layout_constraintTop_toTopOf="@id/topCard"
+			app:layout_constraintBottom_toBottomOf="@id/topCard"
+			app:layout_constraintEnd_toEndOf="@id/topCard"
+			app:layout_constraintStart_toStartOf="@id/topCard"
+			/>
 
-	        android:text="@string/fragment_cards_explanation_text"
-		    android:textSize="18sp"
-		    style="@style/regular_text"
+	</androidx.constraintlayout.motion.widget.MotionLayout>
 
-			app:visibilityInvisible="@{viewModel.showTextHelper}"
-
-			app:layout_constraintBottom_toBottomOf="parent"
-	        app:layout_constraintEnd_toEndOf="parent"
-	        app:layout_constraintStart_toStartOf="parent"
-		    app:layout_constraintTop_toBottomOf="@id/loadingViewCards"
-		    app:layout_constraintVertical_bias="0.3"
-		    />
-
-	</androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

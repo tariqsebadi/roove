@@ -1,7 +1,7 @@
 /*
  * Created by Andrii Kovalchuk
  * Copyright (c) 2020. All rights reserved.
- * Last modified 01.04.20 17:02
+ * Last modified 06.04.20 14:16
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -9,6 +9,7 @@
  */
 
 package com.mmdev.roove.ui.dating.cards
+
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
@@ -29,12 +30,12 @@ class CardsViewModel @Inject constructor(repo: CardsRepository): BaseViewModel()
 	private val checkMatchUC = CheckMatchUseCase(repo)
 	private val getUsersByPreferencesUC = GetUsersByPreferencesUseCase(repo)
 
-	val usersCardsList: MutableLiveData<List<UserItem>> = MutableLiveData()
+	private val usersCardsList: MutableLiveData<List<UserItem>> = MutableLiveData(emptyList())
+
 
 	val showLoading: MutableLiveData<Boolean> = MutableLiveData()
 	val showMatchDialog: MutableLiveData<Boolean> = MutableLiveData()
 	val showTextHelper: MutableLiveData<Boolean> = MutableLiveData()
-
 
 
 	fun addToSkipped(skippedUserItem: UserItem) {
@@ -67,6 +68,7 @@ class CardsViewModel @Inject constructor(repo: CardsRepository): BaseViewModel()
 		                       usersCardsList.value = it
 		                       showLoading.value = false
 		                       showTextHelper.value = false
+		                       updateStream()
 	                       }
 	                       else showTextHelper.value = true
 	                       Log.wtf(TAG, "loaded cards: ${it.size}")
@@ -76,6 +78,31 @@ class CardsViewModel @Inject constructor(repo: CardsRepository): BaseViewModel()
                        }))
 	}
 
+
+	val stream = MutableLiveData<TwoCardsModel>()
+
+	private var currentIndex = 0
+
+	private val topCard
+		get() = usersCardsList.value!![currentIndex % usersCardsList.value!!.size]
+	private val bottomCard
+		get() = usersCardsList.value!![(currentIndex + 1) % usersCardsList.value!!.size]
+
+
+
+	fun swipe() {
+		currentIndex += 1
+		updateStream()
+	}
+
+	private fun updateStream() {
+		stream.value = TwoCardsModel(top = topCard, bottom = bottomCard)
+	}
+
+	data class TwoCardsModel(
+		val top: UserItem,
+		val bottom: UserItem
+	)
 
 	private fun addToSkippedExecution(skippedUserItem: UserItem) = addToSkippedUC.execute(skippedUserItem)
 	private fun checkMatchExecution(likedUserItem: UserItem) = checkMatchUC.execute(likedUserItem)
