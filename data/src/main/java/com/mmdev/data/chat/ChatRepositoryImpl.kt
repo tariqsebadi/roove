@@ -1,7 +1,7 @@
 /*
  * Created by Andrii Kovalchuk
  * Copyright (c) 2020. All rights reserved.
- * Last modified 27.03.20 16:59
+ * Last modified 08.04.20 16:40
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -18,13 +18,16 @@ import com.google.firebase.storage.StorageReference
 import com.mmdev.business.chat.MessageItem
 import com.mmdev.business.chat.repository.ChatRepository
 import com.mmdev.business.conversations.ConversationItem
-import com.mmdev.business.core.BaseUserInfo
 import com.mmdev.business.core.PhotoItem
 import com.mmdev.data.core.BaseRepositoryImpl
 import com.mmdev.data.core.schedulers.ExecuteSchedulers
 import com.mmdev.data.user.UserWrapper
-import io.reactivex.rxjava3.core.*
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.ObservableOnSubscribe
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.internal.operators.observable.ObservableCreate
+import io.reactivex.rxjava3.internal.operators.single.SingleCreate
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -41,34 +44,50 @@ class ChatRepositoryImpl @Inject constructor(private val firestore: FirebaseFire
                                              userWrapper: UserWrapper):
 		ChatRepository, BaseRepositoryImpl(firestore, userWrapper) {
 
-	companion object {
-		private const val MESSAGES_COLLECTION_REFERENCE = "messages"
-		private const val MESSAGE_TIMESTAMP_FIELD = "timestamp"
-	}
-
-	private var conversation = ConversationItem()
-	private var partner = BaseUserInfo()
+	private lateinit var partnerDocRef: DocumentReference
 
 	private lateinit var initialChatQuery : Query
 
 	private lateinit var paginateChatQuery: Query
 	private lateinit var paginateLastLoadedMessage: DocumentSnapshot
 
+	private var firstMessageItem = MessageItem()
+
+	private var isPartnerOnline = false
+
+	companion object {
+		private const val CONVERSATION_PARTNER_ONLINE_FIELD = "partnerOnline"
+		private const val CONVERSATION_UNREAD_COUNT_FIELD = "unreadCount"
+		private const val MESSAGES_COLLECTION_REFERENCE = "messages"
+		private const val MESSAGE_TIMESTAMP_FIELD = "timestamp"
+		private const val MESSAGE_SENDER_ID_FILED = "sender.userId"
+	}
 
 	override fun loadMessages(conversation: ConversationItem): Single<List<MessageItem>> {
-		this.conversation = conversation
-		this.partner = conversation.partner
-
 		initialChatQuery = firestore.collection(CONVERSATIONS_COLLECTION_REFERENCE)
 			.document(conversation.conversationId)
 			.collection(MESSAGES_COLLECTION_REFERENCE)
 			.orderBy(MESSAGE_TIMESTAMP_FIELD, Query.Direction.DESCENDING)
 			.limit(20)
 
-		return Single.create(SingleOnSubscribe<List<MessageItem>> { emitter ->
+		//init partner doc reference
+		partnerDocRef = firestore.collection(USERS_COLLECTION_REFERENCE)
+			.document(conversation.partner.city)
+			.collection(conversation.partner.gender)
+			.document(conversation.partner.userId)
+
+		//reset unread count
+		currentUserDocRef.collection(CONVERSATIONS_COLLECTION_REFERENCE)
+			.document(conversation.conversationId)
+			.update(CONVERSATION_UNREAD_COUNT_FIELD, 0)
+
+		return SingleCreate<List<MessageItem>> { emitter ->
 			initialChatQuery
 				.get()
 				.addOnSuccessListener {
+					partnerDocRef.collection(CONVERSATIONS_COLLECTION_REFERENCE)
+						.document(conversation.conversationId)
+						.update(CONVERSATION_PARTNER_ONLINE_FIELD, true)
 					//check if there is messages first
 					//it will throw exception IndexOutOfRange without this statement
 					if (!it.isEmpty) {
@@ -79,7 +98,7 @@ class ChatRepositoryImpl @Inject constructor(private val firestore: FirebaseFire
 							initialMessageList.add(message)
 						}
 						emitter.onSuccess(initialMessageList)
-
+						firstMessageItem = initialMessageList[0]
 						//new cursor position
 						paginateLastLoadedMessage = it.documents[it.size() - 1]
 						//update query with new cursor position
@@ -89,12 +108,11 @@ class ChatRepositoryImpl @Inject constructor(private val firestore: FirebaseFire
 					else emitter.onSuccess(emptyList())
 				}
 				.addOnFailureListener { emitter.onError(it) }
-
-		}).subscribeOn(ExecuteSchedulers.io())
+		}.subscribeOn(ExecuteSchedulers.io())
 	}
 
-	override fun loadMoreMessages(): Single<List<MessageItem>> {
-		return Single.create(SingleOnSubscribe<List<MessageItem>> { emitter ->
+	override fun loadMoreMessages(): Single<List<MessageItem>> =
+		SingleCreate<List<MessageItem>> { emitter ->
 			paginateChatQuery
 				.get()
 				.addOnSuccessListener {
@@ -115,13 +133,17 @@ class ChatRepositoryImpl @Inject constructor(private val firestore: FirebaseFire
 					else emitter.onSuccess(emptyList())
 				}
 				.addOnFailureListener { emitter.onError(it) }
-		}).subscribeOn(ExecuteSchedulers.io())
-	}
+		}.subscribeOn(ExecuteSchedulers.io())
 
 	override fun observeNewMessages(conversation: ConversationItem): Observable<MessageItem> {
 		super.reInit()
-		this.conversation = conversation
-		this.partner = conversation.partner
+
+		if (!this::partnerDocRef.isInitialized)
+			partnerDocRef = firestore.collection(USERS_COLLECTION_REFERENCE)
+				.document(conversation.partner.city)
+				.collection(conversation.partner.gender)
+				.document(conversation.partner.userId)
+
 		return Observable.create(ObservableOnSubscribe<MessageItem> { emitter ->
 			val listener = firestore.collection(CONVERSATIONS_COLLECTION_REFERENCE)
 				.document(conversation.conversationId)
@@ -132,37 +154,65 @@ class ChatRepositoryImpl @Inject constructor(private val firestore: FirebaseFire
 						emitter.onError(e)
 						return@addSnapshotListener
 					}
-
+					var message: MessageItem
 					if (snapshots != null && snapshots.documents.isNotEmpty()) {
 						//if sent from current device
 						if (snapshots.metadata.hasPendingWrites()) {
 							for (dc in snapshots.documentChanges) {
 								if (dc.type == DocumentChange.Type.ADDED) {
-									val message = dc.document.toObject(MessageItem::class.java)
+									message = dc.document.toObject(MessageItem::class.java)
 									//Log.wtf(TAG, "Added: ${dc.document["text"]}")
 									emitter.onNext(message)
 								}
 							}
 						}
 						//partner send msg
-						else if (snapshots.documents[0].get("sender.userId") != currentUser.baseUserInfo.userId) {
-							val message = snapshots.documents[0].toObject(MessageItem::class.java)!!
-							//check if last message was loaded with pagination before
-							//Log.wtf(TAG, "mapped message text from partner: ${message.text}")
-							emitter.onNext(message)
+						else if (snapshots.documents[0].get(MESSAGE_SENDER_ID_FILED) != currentUser.baseUserInfo.userId) {
+							message = snapshots.documents[0].toObject(MessageItem::class.java)!!
+							//remove last duplicated message from initLoad and this snapshot listener
+							if (message != firstMessageItem)
+								emitter.onNext(message)
 						}
 					}
 					else Log.wtf(TAG, "snapshots is null or empty")
 				}
-			emitter.setCancellable { listener.remove() }
+			emitter.setCancellable {
+				partnerDocRef.collection(CONVERSATIONS_COLLECTION_REFERENCE)
+					.document(conversation.conversationId)
+					.update(CONVERSATION_PARTNER_ONLINE_FIELD, false)
+				listener.remove()
+			}
 		}).subscribeOn(ExecuteSchedulers.io())
 	}
+
+	override fun observePartnerOnline(conversationId: String): Observable<Boolean> =
+		ObservableCreate<Boolean> { emitter ->
+
+			val listener = currentUserDocRef
+				.collection(CONVERSATIONS_COLLECTION_REFERENCE)
+				.document(conversationId)
+				.addSnapshotListener { snapshot, e ->
+					if (e != null) {
+						emitter.onError(e)
+						return@addSnapshotListener
+					}
+					if (snapshot != null && snapshot.exists()) {
+						snapshot.getBoolean(CONVERSATION_PARTNER_ONLINE_FIELD)?.let {
+							if (isPartnerOnline != it)
+								isPartnerOnline = it
+							emitter.onNext(it)
+						}
+
+					}
+				}
+			emitter.setCancellable { listener.remove() }
+		}.subscribeOn(ExecuteSchedulers.io())
 
 	override fun sendMessage(messageItem: MessageItem, emptyChat: Boolean?): Completable {
 		//Log.wtf("TAG", "is empty recieved? + $emptyChat")
 		val conversation = firestore
 			.collection(CONVERSATIONS_COLLECTION_REFERENCE)
-			.document(conversation.conversationId)
+			.document(messageItem.conversationId)
 
 		messageItem.timestamp = FieldValue.serverTimestamp()
 
@@ -172,7 +222,8 @@ class ChatRepositoryImpl @Inject constructor(private val firestore: FirebaseFire
 				.set(messageItem)
 				.addOnSuccessListener {
 					updateLastMessage(messageItem)
-					if (emptyChat != null && emptyChat == true) updateStartedStatus()
+					if (emptyChat != null && emptyChat == true) updateStartedStatus(messageItem)
+					updateUnreadMessagesCount(messageItem.conversationId)
 					emitter.onComplete()
 				}
 				.addOnFailureListener { emitter.onError(it) }
@@ -180,21 +231,19 @@ class ChatRepositoryImpl @Inject constructor(private val firestore: FirebaseFire
 		}.subscribeOn(ExecuteSchedulers.io())
 	}
 
-	override fun uploadMessagePhoto(photoUri: String): Observable<PhotoItem> {
+	override fun uploadMessagePhoto(photoUri: String, conversationId: String): Observable<PhotoItem> {
 		val namePhoto = DateFormat.format("yyyy-MM-dd_hhmmss", Date()).toString()+".jpg"
 		val storageRef = storage
 			.child(GENERAL_FOLDER_STORAGE_IMG)
 			.child(SECONDARY_FOLDER_STORAGE_IMG)
-			.child(conversation.conversationId)
+			.child(conversationId)
 			.child(namePhoto)
 		return Observable.create(ObservableOnSubscribe<PhotoItem> { emitter ->
 			//Log.wtf(TAG, "upload photo observable called")
 			val uploadTask = storageRef.putFile(Uri.parse(photoUri))
 				.addOnSuccessListener {
 					storageRef.downloadUrl.addOnSuccessListener {
-						val photoAttached = PhotoItem(
-								namePhoto,
-								it.toString())
+						val photoAttached = PhotoItem(namePhoto, it.toString())
 						//Log.wtf(TAG, "photo uploaded: $photoAttached")
 						emitter.onNext(photoAttached)
 						emitter.onComplete()
@@ -205,30 +254,26 @@ class ChatRepositoryImpl @Inject constructor(private val firestore: FirebaseFire
 		}).subscribeOn(ExecuteSchedulers.io())
 	}
 
-	private fun updateStartedStatus() {
+	private fun updateStartedStatus(messageItem: MessageItem) {
 		super.reInit()
 		// for current
 		currentUserDocRef
 			.collection(CONVERSATIONS_COLLECTION_REFERENCE)
-			.document(conversation.conversationId)
+			.document(messageItem.conversationId)
 			.update(CONVERSATION_STARTED_FIELD, true)
+
 		currentUserDocRef
 			.collection(USER_MATCHED_COLLECTION_REFERENCE)
-			.document(partner.userId)
+			.document(messageItem.recipientId)
 			.update(CONVERSATION_STARTED_FIELD, true)
 
 
 		// for partner
-		val partnerUserReference = firestore.collection(USERS_COLLECTION_REFERENCE)
-			.document(partner.city)
-			.collection(partner.gender)
-			.document(partner.userId)
-
-		partnerUserReference
+		partnerDocRef
 			.collection(CONVERSATIONS_COLLECTION_REFERENCE)
-			.document(conversation.conversationId)
+			.document(messageItem.conversationId)
 			.update(CONVERSATION_STARTED_FIELD, true)
-		partnerUserReference
+		partnerDocRef
 			.collection(USER_MATCHED_COLLECTION_REFERENCE)
 			.document(currentUser.baseUserInfo.userId)
 			.update(CONVERSATION_STARTED_FIELD, true)
@@ -239,14 +284,11 @@ class ChatRepositoryImpl @Inject constructor(private val firestore: FirebaseFire
 		super.reInit()
 		val cur = currentUserDocRef
 			.collection(CONVERSATIONS_COLLECTION_REFERENCE)
-			.document(conversation.conversationId)
+			.document(messageItem.conversationId)
 
-		val par = firestore.collection(USERS_COLLECTION_REFERENCE)
-			.document(partner.city)
-			.collection(partner.gender)
-			.document(partner.userId)
+		val par = partnerDocRef
 			.collection(CONVERSATIONS_COLLECTION_REFERENCE)
-			.document(conversation.conversationId)
+			.document(messageItem.conversationId)
 
 		if (messageItem.photoItem != null) {
 			// for current
@@ -266,5 +308,16 @@ class ChatRepositoryImpl @Inject constructor(private val firestore: FirebaseFire
 		}
 		//Log.wtf(TAG, "last message updated")
 	}
+
+	private fun updateUnreadMessagesCount(conversationId: String) {
+		if (!isPartnerOnline) {
+			partnerDocRef
+				.collection(CONVERSATIONS_COLLECTION_REFERENCE)
+				.document(conversationId)
+				.update(CONVERSATION_UNREAD_COUNT_FIELD, FieldValue.increment(1))
+		}
+
+	}
+
 
 }

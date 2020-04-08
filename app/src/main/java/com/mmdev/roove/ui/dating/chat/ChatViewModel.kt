@@ -1,7 +1,7 @@
 /*
  * Created by Andrii Kovalchuk
  * Copyright (c) 2020. All rights reserved.
- * Last modified 29.03.20 18:37
+ * Last modified 07.04.20 17:28
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -22,6 +22,11 @@ import com.mmdev.roove.ui.common.errors.ErrorType
 import com.mmdev.roove.ui.common.errors.MyError
 import javax.inject.Inject
 
+
+/**
+ * [chatIsEmpty] used to mark conversation started or not to move partner out of pairs section
+ * */
+
 class ChatViewModel @Inject constructor(repo: ChatRepository) :
 		BaseViewModel() {
 
@@ -29,6 +34,7 @@ class ChatViewModel @Inject constructor(repo: ChatRepository) :
 	private val loadMessagesUC = LoadMessagesUseCase(repo)
 	private val loadMoreMessagesUC = LoadMoreMessagesUseCase(repo)
 	private val observeNewMessagesUC = ObserveNewMessagesUseCase(repo)
+	private val observePartnerOnlineUC = ObservePartnerOnlineUseCase(repo)
 	private val sendMessageUC = SendMessageUseCase(repo)
 	private val uploadMessagePhotoUC = UploadMessagePhotoUseCase(repo)
 
@@ -39,12 +45,15 @@ class ChatViewModel @Inject constructor(repo: ChatRepository) :
 	val showLoading: MutableLiveData<Boolean> = MutableLiveData()
 	val newMessage: MutableLiveData<MessageItem> = MutableLiveData()
 
-	private lateinit var selectedConversation: ConversationItem
 	val chatIsEmpty: MutableLiveData<Boolean> = MutableLiveData()
+
+	//ui bind values
+	val partnerName: MutableLiveData<String> = MutableLiveData("")
+	val partnerPhoto: MutableLiveData<String> = MutableLiveData("")
+	val isPartnerOnline: MutableLiveData<Boolean> = MutableLiveData(false)
 
 
 	fun loadMessages(conversation: ConversationItem) {
-		selectedConversation = conversation
 		disposables.add(loadMessagesExecution(conversation)
             .observeOn(mainThread())
             .subscribe({
@@ -82,17 +91,30 @@ class ChatViewModel @Inject constructor(repo: ChatRepository) :
 	}
 
 	fun observeNewMessages(conversation: ConversationItem){
-		selectedConversation = conversation
 		disposables.add(observeNewMessagesExecution(conversation)
             .observeOn(mainThread())
             .subscribe({
-	                       newMessage.value = it
-	                       messagesList.value!!.add(0, it)
-	                       chatIsEmpty.value = false
-	                       Log.wtf(TAG, "last received message: ${it.text}")
+                           newMessage.value = it
+                           messagesList.value!!.add(0, it)
+                           chatIsEmpty.value = false
+                           Log.wtf(TAG, "last received message: ${it.text}")
                        },
                        {
-	                       error.value = MyError(ErrorType.RECEIVING, it)
+                           error.value = MyError(ErrorType.RECEIVING, it)
+                       }
+            )
+		)
+	}
+
+	fun observePartnerOnline(conversationId: String){
+		disposables.add(observePartnerOnlineExecution(conversationId)
+            .observeOn(mainThread())
+            .subscribe({
+                           if (isPartnerOnline.value != it)
+	                           isPartnerOnline.value = it
+                       },
+                       {
+                           error.value = MyError(ErrorType.RECEIVING, it)
                        }
             )
 		)
@@ -107,14 +129,14 @@ class ChatViewModel @Inject constructor(repo: ChatRepository) :
 	}
 
 	//upload photo then send it as message item
-	fun sendPhoto(photoUri: String, sender: BaseUserInfo, recipient: String) {
-		disposables.add(uploadPhotoExecution(photoUri)
+	fun sendPhoto(photoUri: String, conversation: ConversationItem, sender: BaseUserInfo) {
+		disposables.add(uploadPhotoExecution(photoUri, conversation.conversationId)
             .flatMapCompletable {
 	            val photoMessage =
 		            MessageItem(sender = sender,
-		                        recipientId = recipient,
+		                        recipientId = conversation.partner.userId,
 		                        photoItem = it,
-		                        conversationId = selectedConversation.conversationId)
+		                        conversationId = conversation.conversationId)
 	            sendMessageExecution(photoMessage, chatIsEmpty.value)
             }
             .observeOn(mainThread())
@@ -128,8 +150,10 @@ class ChatViewModel @Inject constructor(repo: ChatRepository) :
 	private fun loadMoreMessagesExecution() = loadMoreMessagesUC.execute()
 	private fun observeNewMessagesExecution(conversation: ConversationItem) =
 		observeNewMessagesUC.execute(conversation)
+	private fun observePartnerOnlineExecution(conversationId: String) =
+		observePartnerOnlineUC.execute(conversationId)
 	private fun sendMessageExecution(messageItem: MessageItem, emptyChat: Boolean? = false) =
 		sendMessageUC.execute(messageItem, emptyChat)
-	private fun uploadPhotoExecution(photoUri: String) =
-		uploadMessagePhotoUC.execute(photoUri)
+	private fun uploadPhotoExecution(photoUri: String, conversationId: String) =
+		uploadMessagePhotoUC.execute(photoUri, conversationId)
 }
