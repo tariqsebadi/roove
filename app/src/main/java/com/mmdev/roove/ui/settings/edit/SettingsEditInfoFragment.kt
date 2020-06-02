@@ -1,7 +1,7 @@
 /*
  * Created by Andrii Kovalchuk
  * Copyright (c) 2020. All rights reserved.
- * Last modified 08.04.20 17:15
+ * Last modified 01.06.20 16:55
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -205,7 +205,7 @@ class SettingsEditInfoFragment: BaseFragment<RemoteRepoViewModel>(true) {
 	}
 
 	private fun changerAgeSetup() {
-		sliderSettingsEditAge.setOnChangeListener{ _, value ->
+		sliderSettingsEditAge.addOnChangeListener { _, value, _ ->
 			age = value.toInt()
 			currentUser.baseUserInfo.age = age
 			tvSettingsEditAge.text = "Age: $age"
@@ -213,7 +213,7 @@ class SettingsEditInfoFragment: BaseFragment<RemoteRepoViewModel>(true) {
 	}
 
 	private fun changerCitySetup() {
-		val cityAdapter = ArrayAdapter(context!!,
+		val cityAdapter = ArrayAdapter(requireContext(),
 		                               R.layout.drop_text_item,
 		                               cityList.map { it.key })
 		dropSettingsEditCity.setAdapter(cityAdapter)

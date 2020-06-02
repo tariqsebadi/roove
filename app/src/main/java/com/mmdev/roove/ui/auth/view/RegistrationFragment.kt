@@ -1,7 +1,7 @@
 /*
  * Created by Andrii Kovalchuk
  * Copyright (c) 2020. All rights reserved.
- * Last modified 02.04.20 17:36
+ * Last modified 02.06.20 17:22
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -163,7 +163,7 @@ class RegistrationFragment: BaseFragment<AuthViewModel>(true){
 
 
 		//step 3 age
-		sliderAge.setOnChangeListener { _, value ->
+		sliderAge.addOnChangeListener { _, value, _ ->
 			age = value.toInt()
 			tvAgeDisplay.text = age.toString()
 		}
@@ -211,7 +211,7 @@ class RegistrationFragment: BaseFragment<AuthViewModel>(true){
 
 
 		//step 4 city
-		val cityAdapter = ArrayAdapter(context!!,
+		val cityAdapter = ArrayAdapter(requireContext(),
 		                               R.layout.drop_text_item,
 		                               cityList.map { it.key })
 		dropdownCityChooser.setAdapter(cityAdapter)
