@@ -1,7 +1,7 @@
 /*
  * Created by Andrii Kovalchuk
  * Copyright (c) 2020. All rights reserved.
- * Last modified 01.06.20 17:02
+ * Last modified 02.06.20 17:43
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -20,8 +20,7 @@ apply plugin: 'com.google.gms.google-services'
 android {
 
 	def globalConfiguration = rootProject.extensions.getByName("ext")
-	//compileSdkVersion globalConfiguration["androidCompileSdkVersion"]
-	compileSdkVersion 'android-R'
+	compileSdkVersion globalConfiguration["androidCompileSdkVersion"]
 
 
 	defaultConfig {
