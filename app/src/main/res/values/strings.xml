@@ -2,7 +2,7 @@
 <!--
   ~ Created by Andrii Kovalchuk
   ~ Copyright (c) 2020. All rights reserved.
-  ~ Last modified 03.07.20 20:30
+  ~ Last modified 10.07.20 19:41
   ~
   ~ This Source Code Form is subject to the terms of the Mozilla Public
   ~ License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -109,6 +109,7 @@
 	<string name="toast_text_report_success">Report sent successfully\nThank you!</string>
 	<string name="toast_text_update_success">Successfully updated</string>
 	<string name="toast_text_delete_success">Successfully deleted</string>
+	<string name="toast_text_at_least_1_photo_required">At least one photo required.</string>
 
 	<string name="place_detailed_want_to_go_text">Want to go</string>
 	<string name="place_detailed_not_interested_text">Not interested</string>
@@ -176,4 +177,5 @@
 	<string name="city_api_nsk" translatable="false">nsk</string>
 	<string name="city_api_spb" translatable="false">spb</string>
 	<string name="city_api_sochi" translatable="false">sochi</string>
+
 </resources>

@@ -1,7 +1,7 @@
 /*
  * Created by Andrii Kovalchuk
  * Copyright (c) 2020. All rights reserved.
- * Last modified 03.07.20 20:30
+ * Last modified 10.07.20 19:41
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -119,7 +119,7 @@ class SettingsEditInfoFragment: BaseFragment<RemoteRepoViewModel>(true) {
 					associatedViewModel.deletePhoto(photoToDelete,
 					                                currentUser, isMainPhotoDeleting)
 				}
-				else requireContext().showToastText("Хотя бы 1 фотка должна быть")
+				else requireContext().showToastText(getString(R.string.toast_text_at_least_1_photo_required))
 			}
 		})
 
