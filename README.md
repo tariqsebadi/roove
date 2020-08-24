@@ -2,7 +2,7 @@
 
 
 
-**Dating app with tinder-style cards & place for date chooser.**
+**Dating app with tinder-style cards & choosing place for a date.**
 
 *Note: this app doesn't use GPS or other systems to obtain user real physical location*
 
