@@ -32,7 +32,7 @@ android {
 	keyProperties.load(new FileInputStream(keyPropertiesFile))
 
 	defaultConfig {
-		buildConfigField("String", "FIREBASE_STORAGE_URL", keyProperties['FIREBASE_STORAGE_URL'])
+		buildConfigField("String", "gs://roove-63cfa.appspot.com", keyProperties['gs://roove-63cfa.appspot.com'])
 		buildConfigField("String", "KEY_ENCRYPTION_KEY", keyProperties['KEY_ENCRYPTION_KEY'])
 		buildConfigField("String", "VALUE_ENCRYPTION_KEY", keyProperties['VALUE_ENCRYPTION_KEY'])
 		buildConfigField("String", "VALUE_ENCRYPTION_VECTOR_KEY", keyProperties['VALUE_ENCRYPTION_VECTOR_KEY'])

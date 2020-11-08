@@ -67,36 +67,36 @@
 
 		<TextView
 			android:id="@+id/tvMatchedName"
+			style="@style/medium_text"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:fontFamily="@font/rubik_bold"
+
 			android:text="@{name, default = @string/default_name}"
 			android:textSize="28sp"
-
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintTop_toBottomOf="@id/matched_photo"
 			app:layout_constraintBottom_toTopOf="@id/tvMatchDialogBack"
-			app:layout_constraintVertical_bias="0.7"
-			style="@style/medium_text"/>
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toBottomOf="@id/matched_photo"
+			app:layout_constraintVertical_bias="0.7" />
 
 		<TextView
 			android:id="@+id/tvMatchDialogBack"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginBottom="@dimen/general_size_24dp"
-			app:paddingBottomSystemWindowInsets="@{true}"
+			android:fontFamily="@font/rubik"
 
-			android:fontFamily="@font/rubik_bold"
 			android:text="@string/tv_back_to_swiping"
 			android:textColor="@color/gradient1"
 			android:textSize="28sp"
-
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintTop_toBottomOf="@id/tvMatchedName"
 			app:layout_constraintBottom_toBottomOf="parent"
+
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toBottomOf="@id/tvMatchedName"
 			app:layout_constraintVertical_bias="0.9"
-			/>
+			app:paddingBottomSystemWindowInsets="@{true}" />
 
 
 	</androidx.constraintlayout.widget.ConstraintLayout>
