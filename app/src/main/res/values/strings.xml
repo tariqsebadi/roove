@@ -43,6 +43,9 @@
 	<string name="auth_slogan1">Find new\nfriends nearby</string>
 	<string name="auth_slogan2">Visit interesting\nplaces together!</string>
 	<string name="btn_log_in_with_facebook">Log in with Facebook</string>
+	<!--Facebook Logins-->
+	<string name="facebook_app_id" translatable="false">748070889117719</string>
+	<string name="fb_login_protocol_scheme" translatable="false">fb748070889117719</string>
 
 	<string name="reg_step_1_tv_select_your_gender">Select your gender</string>
 	<string name="reg_step_3_tv_specify_your_age">Specify your age</string>
